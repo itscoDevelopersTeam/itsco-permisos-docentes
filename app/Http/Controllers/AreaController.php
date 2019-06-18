@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Area;
+use App\User;
 use Illuminate\Http\Request;
 
 class AreaController extends Controller
@@ -14,7 +15,8 @@ class AreaController extends Controller
      */
     public function index()
     {
-        return 'areas.index';
+        $areas = Area::paginate();
+        return view('areas.index', compact('areas'));
     }
 
     /**
@@ -24,7 +26,8 @@ class AreaController extends Controller
      */
     public function create()
     {
-        return 'areas.create';
+        $users = User::all()->sortBy('name');
+        return view('areas.create', compact('users'));
     }
 
     /**
@@ -35,7 +38,18 @@ class AreaController extends Controller
      */
     public function store(Request $request)
     {
-        return 'areas.create';
+        $manager = User::find($request->get('user_id'));
+        $old_area = $manager->managed_area;
+        $old_area->user_id = null;
+        $old_area->save();
+
+        $area = Area::create($request->all());
+        $manager->area_id = $area->id;
+        $manager->save();
+        echo $manager;
+
+        return redirect()->route('areas.edit', $area->id)
+            ->with('info', 'Area actualizada con éxito');
     }
 
     /**
@@ -46,7 +60,7 @@ class AreaController extends Controller
      */
     public function show(Area $area)
     {
-        return 'areas.show';
+        return view('areas.show', compact('area'));
     }
 
     /**
@@ -57,7 +71,8 @@ class AreaController extends Controller
      */
     public function edit(Area $area)
     {
-        return 'areas.edit';
+        $users = User::all()->sortBy('name');
+        return view('areas.edit', compact('area', 'users'));
     }
 
     /**
@@ -69,7 +84,38 @@ class AreaController extends Controller
      */
     public function update(Request $request, Area $area)
     {
-        return 'areas.edit';
+        /**
+         * Preguntar si el campo user_id cambió
+         * si cambió, entonces realizar proceso de 
+         * asignación de jefe a las areas
+         */
+        if($request->input('user_id') != $area->user_id) {
+            $manager = User::find($request->get('user_id'));
+            
+            /**
+             * Obtiene el área que es administrada
+             * por este usuario y la establece a null
+             */
+            $old_managed_area = $manager->managed_area;
+            $old_managed_area->user_id = null;
+            $old_managed_area->save();
+
+            /**
+             * Obtiene el area que se asignará
+             * a este manager
+             */
+            $manager->area_id = $area->id;
+            $manager->save();
+        }
+
+        /**
+         * Guarda los cambios creados en
+         * el área actual
+         */
+        $area->update($request->all());
+
+        return redirect()->route('areas.edit', $area->id)
+            ->with('info', 'Area actualizada con éxito');
     }
 
     /**
@@ -80,6 +126,7 @@ class AreaController extends Controller
      */
     public function destroy(Area $area)
     {
-        return 'areas.destroy';
+        $area->delete();
+        return back()->with('info', 'Eliminado correctamente');
     }
 }
