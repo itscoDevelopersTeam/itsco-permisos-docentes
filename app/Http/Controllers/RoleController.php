@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Caffeinated\Shinobi\Models\Role;
 use Illuminate\Http\Request;
+use Caffeinated\Shinobi\Models\Role;
+use Caffeinated\Shinobi\Models\Permission;
 
 class RoleController extends Controller
 {
-    /**
+     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return 'roles.index';
+        $roles = Role::paginate();
+        return view('roles.index', compact('roles'));
     }
 
     /**
@@ -24,7 +26,8 @@ class RoleController extends Controller
      */
     public function create()
     {
-        return 'roles.create';
+        $permissions = Permission::all();
+        return view('roles.create', compact('permissions'));
     }
 
     /**
@@ -35,7 +38,10 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        return 'roles.create';
+        $role = Role::create($request->all());
+        $role->syncPermissions($request->get('permissions'));
+        return redirect()->route('roles.edit', $role->id)
+            ->with('info', 'Rol guardado con éxito');
     }
 
     /**
@@ -46,7 +52,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        return 'roles.show';
+        return view('roles.show', compact('role'));
     }
 
     /**
@@ -57,7 +63,8 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        return 'roles.edit';
+        $permissions = Permission::all();
+        return view('roles.edit', compact('role', 'permissions'));
     }
 
     /**
@@ -69,7 +76,10 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        return 'roles.edit';
+        $role->update($request->all());
+        $role->syncPermissions($request->get('permissions'));
+        return redirect()->route('roles.edit', $role->id)
+            ->with('info', 'Rol actualizado con éxito');
     }
 
     /**
@@ -80,6 +90,7 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        return 'roles.destroy';
+        $role->delete();
+        return back()->with('info', 'Eliminado correctamente');
     }
 }

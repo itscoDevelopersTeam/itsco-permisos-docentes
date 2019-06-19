@@ -38,15 +38,40 @@ class AreaController extends Controller
      */
     public function store(Request $request)
     {
-        $manager = User::find($request->get('user_id'));
-        $old_area = $manager->managed_area;
-        $old_area->user_id = null;
-        $old_area->save();
+        /**
+         * Preguntar si el usuario es jefe de otra área
+         */
+        if(!empty($request->input('user_id'))) {
+            $manager = User::find($request->input('user_id'));
+            
+            if(!empty($manager->managed_area)) {
+                $old_managed_area = $manager->managed_area;
+                $old_managed_area->user_id = null;
+                $old_managed_area->save();
+            }
+        }
 
+        /**
+         * Se crea la nueva área.
+         * No importa si se especificó o no un jefe.
+         * Así mismo el usuario indicado se convierte
+         * en jefe de ésta área
+         */
         $area = Area::create($request->all());
-        $manager->area_id = $area->id;
-        $manager->save();
-        echo $manager;
+
+        /**
+         * Si se asignó un usuario, entonces
+         * removerle su área de jefatura
+         */
+        if(!empty($request->input('user_id'))) {
+            $manager = User::find($request->get('user_id'));
+
+            /**
+             * Se asigna ésta área al usuario
+             */
+            $manager->area_id = $area->id;
+            $manager->save();
+        }
 
         return redirect()->route('areas.edit', $area->id)
             ->with('info', 'Area actualizada con éxito');
@@ -91,18 +116,23 @@ class AreaController extends Controller
          */
         if($request->input('user_id') != $area->user_id) {
             $manager = User::find($request->get('user_id'));
-            
-            /**
-             * Obtiene el área que es administrada
-             * por este usuario y la establece a null
-             */
-            $old_managed_area = $manager->managed_area;
-            $old_managed_area->user_id = null;
-            $old_managed_area->save();
 
             /**
-             * Obtiene el area que se asignará
-             * a este manager
+             * Si el usuario es jefe de un área
+             */
+            if(!empty($manager->managed_area)) {
+
+                /**
+                 * Obtiene el área actual que es administrada
+                 * por este usuario y la establece a null
+                 */
+                $old_managed_area = $manager->managed_area;
+                $old_managed_area->user_id = null;
+                $old_managed_area->save();
+            }
+
+            /**
+             * Se asigna ésta area a este nuevo manager
              */
             $manager->area_id = $area->id;
             $manager->save();
