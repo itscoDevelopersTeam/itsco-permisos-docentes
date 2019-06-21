@@ -18,10 +18,12 @@ class CreateSolicitudPermisoTable extends Migration
             $table->enum('status', ['pass', 'not-pass']);
             $table->date('fecha');
             $table->time('hora_inicio');
-            $table->time('hora_terminacion');
+            $table->time('hora_terminacion')
+                ->nullable();
             $table->integer('cantidad_horas');
             $table->bigInteger('user_id')
                 ->unsigned()
+                ->nullable()
                 ->comment('Usuario que solicita el permiso');
             $table->timestamps();
         });

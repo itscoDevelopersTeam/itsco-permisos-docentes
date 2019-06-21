@@ -8,6 +8,8 @@ use Faker\Generator as Faker;
 $factory->define(SolicitudPermiso::class, function (Faker $faker) {
     return [
         'status' => 'not-pass',
+        'asunto' => $faker->sentence(6, true),
+        'descripcion' => $faker->paragraph(7, true),
         'fecha' => $faker->date,
         'hora_inicio' => $faker->time('H:i'),
         'hora_terminacion' => $faker->time('H:i'),

@@ -27,7 +27,7 @@ class UserController extends Controller
          */
         $users = null;
         $manager = Auth::user();
-        if($manager->hasRole('admin') || $manager->hasRole('recursos-humanos')) {
+        if($manager->hasRole('admin') || $manager->hasRole('recursos.humanos')) {
             $users = User::paginate();
         } elseif(!empty($manager->area)) {  // Valida si el usuario tiene asignada o no un área
             $users = $manager->area->users;
@@ -81,6 +81,12 @@ class UserController extends Controller
             $old_managed_area->user_id = null;
             $old_managed_area->save();
         }
+
+        /**
+         * Preguntar si se le asignó como jefe de área
+         * de ser así modificar el campo 'user_id' de
+         * la tabla areas para establecerlo como jefe
+         */
         
         $user->update($request->all());
         $user->syncRoles($request->get('roles'));

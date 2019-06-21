@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AreaTableSeeder::class,
             UserTableSeeder::class,
-            NotificacionTableSeeder::class,
             SolicitudPermisoTableSeeder::class,
+            NotificacionTableSeeder::class,
         ]);
     }
 }

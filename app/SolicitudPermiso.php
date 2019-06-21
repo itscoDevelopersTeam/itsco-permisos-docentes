@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class SolicitudPermiso extends Model
 {
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'asunto', 'descripcion', 'fecha', 'hora_inicio', 'cantidad_horas'
+    ];
+    
+    /**
      * The table associated with the model.
      * 
      * @var string

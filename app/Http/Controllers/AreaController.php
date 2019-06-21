@@ -70,6 +70,7 @@ class AreaController extends Controller
              * Se asigna ésta área al usuario
              */
             $manager->area_id = $area->id;
+            $manager->assignRoles('jefe.area');
             $manager->save();
         }
 
@@ -135,6 +136,7 @@ class AreaController extends Controller
              * Se asigna ésta area a este nuevo manager
              */
             $manager->area_id = $area->id;
+            // $manager->assignRoles(['jefe.area']);
             $manager->save();
         }
 
